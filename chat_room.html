@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ruang Obrolan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; color: #333; display: flex; flex-direction: column; height: 100vh; }
+
+        /* HEADER */
+        .header { background: #fff; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0; }
+        .header-left { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .header-left i { font-size: 20px; color: #ee4d2d; }
+        .shop-info { display: flex; align-items: center; gap: 10px; }
+        .shop-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #eee; }
+        .shop-name { font-size: 15px; font-weight: 500; }
+        
+        .header-right { position: relative; }
+        .header-right i { font-size: 18px; color: #555; margin-left: 15px; cursor: pointer; }
+
+        /* DROPDOWN MENU */
+        .dropdown-menu { display: none; position: absolute; top: 30px; right: 0; background: #fff; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 220px; z-index: 200; overflow: hidden; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { padding: 12px 15px; font-size: 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; cursor: pointer; color: #333; }
+        .dropdown-item:active { background: #f9f9f9; }
+
+        /* AREA CHAT */
+        .chat-area { flex-grow: 1; padding: 15px; overflow-y: auto; background-color: #f5f5f5; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* CHAT BUBBLES */
+        .bubble-wrapper { display: flex; flex-direction: column; max-width: 80%; }
+        .bubble-wrapper.admin { align-self: flex-start; }
+        .bubble-wrapper.user { align-self: flex-end; align-items: flex-end; }
+        
+        .bubble { padding: 12px 15px; border-radius: 8px; font-size: 14px; line-height: 1.4; position: relative; }
+        .bubble.admin { background: #dff5e8; color: #115734; border-top-left-radius: 0; }
+        .bubble.user { background: #fff; border: 1px solid #eee; border-top-right-radius: 0; }
+
+        .chat-time { font-size: 10px; color: #888; margin-top: 5px; text-align: right; }
+
+        /* PRODUK YANG DI-PIN DI CHAT */
+        .product-card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 10px; display: flex; gap: 10px; margin-bottom: 5px; width: 250px; }
+        .product-card img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+        .product-details { display: flex; flex-direction: column; justify-content: space-between; }
+        .product-title { font-size: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-price { color: #ee4d2d; font-size: 13px; font-weight: bold; }
+
+        /* INPUT AREA BOTTOM */
+        .input-area { background: #fff; flex-shrink: 0; border-top: 1px solid #eee; }
+        
+        /* QUICK REPLIES */
+        .quick-replies { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid #f9f9f9; scrollbar-width: none; }
+        .quick-replies::-webkit-scrollbar { display: none; }
+        .quick-btn { background: #f5f5f5; border: 1px solid #e0e0e0; padding: 6px 12px; border-radius: 15px; font-size: 12px; color: #555; cursor: pointer; }
+
+        /* INPUT FORM */
+        .input-form { display: flex; align-items: center; padding: 10px 15px; gap: 15px; }
+        .input-form i { font-size: 20px; color: #888; cursor: pointer; }
+        .input-box { flex-grow: 1; display: flex; align-items: center; background: #f5f5f5; border-radius: 20px; padding: 8px 15px; }
+        .input-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <i class="fa fa-arrow-left" onclick="window.location.href='messages.html'"></i>
+            <div class="shop-info">
+                <img src="https://imgur.com/1xvp0t2" class="shop-avatar">
+                <span class="shop-name">Toko Buku Resmi</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <i class="fa-solid fa-store"></i>
+            <i class="fa fa-ellipsis-v" onclick="toggleMenu()"></i>
+            
+            <!-- DROPDOWN -->
+            <div class="dropdown-menu" id="dropdown-menu">
+                <div class="dropdown-item" onclick="window.location.href='index.html'"><i class="fa-regular fa-user"></i> Tampilkan Profil</div>
+                <div class="dropdown-item" onclick="window.location.href='index.html'"><i class="fa-solid fa-store"></i> Kembali ke halaman utama</div>
+                <div class="dropdown-item"><i class="fa fa-search"></i> Cari</div>
+                <div class="dropdown-item"><i class="fa-regular fa-bell-slash"></i> Matikan</div>
+                <div class="dropdown-item"><i class="fa-regular fa-circle-question"></i> Butuh bantuan?</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AREA CHAT -->
+    <div class="chat-area" id="chat-area">
+        
+        <!-- BUBBLE ADMIN 1 (Auto Reply) -->
+        <div class="bubble-wrapper admin">
+            <div class="bubble admin">
+                Halo! Selamat datang di Toko Buku Resmi ✨<br><br>
+                Hi! Pesanmu telah kami terima. Dikarenakan saat ini di luar jam operasional, kami akan membalas pesanmu segera setelah admin kembali online.<br><br>
+                🕒 Jam Operasional Kami:<br>
+                Senin - Sabtu: 09.00 - 18.00 WIB<br>
+                Libur: Minggu & Tanggal Merah<br><br>
+                Kamu tetap bisa melakukan pemesanan (Checkout) kapan saja, ya!
+            </div>
+            <div class="chat-time">20:09</div>
+        </div>
+
+    </div>
+
+    <!-- AREA INPUT -->
+    <div class="input-area">
+        <div class="quick-replies">
+            <div class="quick-btn" onclick="sendMsg('Hi! Apakah produk ini masih ada?')">Hi! Apakah produk ini masih ada?</div>
+            <div class="quick-btn" onclick="sendMsg('Kapan pesanan saya dikirim?')">Kapan pesanan saya dikirim?</div>
+            <div class="quick-btn" onclick="sendMsg('Terima Kasih!')">Terima Kasih!</div>
+        </div>
+        
+        <div class="input-form">
+            <i class="fa fa-plus-circle"></i>
+            <i class="fa fa-shopping-bag"></i>
+            <div class="input-box">
+                <input type="text" id="chat-input" placeholder="Tulis Pesan..." onkeypress="handleEnter(event)">
+            </div>
+            <i class="fa-regular fa-face-smile"></i>
+            <i class="fa fa-paper-plane" style="color: #ee4d2d;" onclick="sendInputMsg()"></i>
+        </div>
+    </div>
+
+    <!-- SCRIPT FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0", authDomain: "mading-cf676.firebaseapp.com", projectId: "mading-cf676", storageBucket: "mading-cf676.firebasestorage.app", messagingSenderId: "72175203671", appId: "1:72175203671:web:7a0676a55beb64bc96ba12" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserUid = null;
+        const chatArea = document.getElementById('chat-area');
+
+        // TOGGLE DROPDOWN MENU
+        window.toggleMenu = () => {
+            document.getElementById('dropdown-menu').classList.toggle('show');
+        };
+        // Tutup dropdown jika klik di luar
+        window.onclick = function(event) {
+            if (!event.target.matches('.fa-ellipsis-v')) {
+                const dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                loadRealtimeChat();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // LOAD CHAT REALTIME DARI FIREBASE
+        function loadRealtimeChat() {
+            // Karena ini single-store, kita buat koleksi "chats" dengan referensi user_id
+            const q = query(collection(db, "chats"), where("user_id", "==", currentUserUid), orderBy("timestamp", "asc"));
+            
+            onSnapshot(q, (snapshot) => {
+                // Jangan clear semua innerHTML agar auto-reply awal tidak hilang, 
+                // tapi di sistem nyata, auto-reply juga disimpan di DB.
+                
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        renderMessage(data);
+                    }
+                });
+                
+                // Auto scroll ke bawah
+                chatArea.scrollTop = chatArea.scrollHeight;
+            });
+        }
+
+        function renderMessage(data) {
+            const timeStr = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Baru saja';
+            
+            let bubbleHtml = '';
+            if(data.sender === "admin") {
+                bubbleHtml = `
+                    <div class="bubble-wrapper admin">
+                        <div class="bubble admin">${data.text}</div>
+                        <div class="chat-time">${timeStr}</div>
+                    </div>`;
+            } else {
+                bubbleHtml = `
+                    <div class="bubble-wrapper user">
+                        <div class="bubble user">${data.text}</div>
+                        <div class="chat-time">${timeStr}</div>
+                    </div>`;
+            }
+            chatArea.innerHTML += bubbleHtml;
+        }
+
+        // FUNGSI KIRIM PESAN
+        window.sendMsg = async (text) => {
+            if(!text || !currentUserUid) return;
+            try {
+                await addDoc(collection(db, "chats"), {
+                    user_id: currentUserUid,
+                    sender: "user",
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Gagal kirim pesan", e);
+            }
+        };
+
+        window.sendInputMsg = () => {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if(text) {
+                sendMsg(text);
+                input.value = ''; // Kosongkan input
+            }
+        };
+
+        window.handleEnter = (e) => {
+            if (e.key === 'Enter') {
+                sendInputMsg();
+            }
+        };
+    </script>
+</body>
+</html>
