@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Log In - Toko Buku</title>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RESET & DASAR - MOBILE FIRST */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #fff;
+            color: #333;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #fff;
+        }
+        .header i {
+            font-size: 20px;
+            color: #ee4d2d; /* Warna oranye kemerahan khas e-commerce */
+            cursor: pointer;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+        .header .fa-circle-question {
+            color: #ee4d2d;
+            font-size: 22px;
+        }
+
+        /* LOGO */
+        .logo-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .logo-container img {
+            width: 70px;
+            height: auto;
+        }
+
+        /* FORM LOGIN */
+        .form-container {
+            padding: 0 20px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            margin-bottom: 5px;
+        }
+        .input-group i.icon-left {
+            font-size: 18px;
+            color: #888;
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+        .input-group input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: transparent;
+        }
+        .input-group input::placeholder {
+            color: #bbb;
+        }
+        .input-group i.fa-eye, .input-group i.fa-eye-slash {
+            color: #888;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+        .lupa-password {
+            color: #0056b3;
+            text-decoration: none;
+            font-size: 14px;
+            border-left: 1px solid #ccc;
+            padding-left: 10px;
+        }
+
+        /* TOMBOL LOGIN */
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #ee4d2d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            opacity: 0.5; /* Opacity turun jika belum diisi */
+            transition: opacity 0.3s;
+        }
+        .btn-login.active {
+            opacity: 1;
+        }
+
+        .login-hp {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .login-hp a {
+            color: #0056b3;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        /* DAFTAR & SIDIK JARI */
+        .bottom-section {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+        .bottom-section a {
+            color: #0056b3;
+            text-decoration: none;
+        }
+        .fingerprint-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 20px;
+        }
+        .fingerprint-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        .fingerprint-left i.fa-fingerprint {
+            font-size: 24px;
+            color: #555;
+        }
+        .fingerprint-left i.fa-circle-question {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Toggle Switch CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        #error-msg {
+            color: red;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <i class="fa fa-arrow-left" onclick="history.back()"></i>
+        <h1>Log In</h1>
+        <i class="fa-regular fa-circle-question"></i>
+    </div>
+
+    <!-- LOGO -->
+    <div class="logo-container">
+        <!-- Menggunakan link logo yang Anda sediakan -->
+        <img src="https://imgur.com/1xvp0t2" alt="Logo Toko Buku">
+    </div>
+
+    <!-- FORM LOGIN -->
+    <div class="form-container">
+        <div class="input-group">
+            <i class="fa-regular fa-user icon-left"></i>
+            <input type="email" id="email" placeholder="Email / Username" oninput="checkInputs()">
+        </div>
+        <div class="input-group">
+            <i class="fa fa-lock icon-left"></i>
+            <input type="password" id="password" placeholder="Password" oninput="checkInputs()">
+            <i class="fa-regular fa-eye-slash" id="toggle-pw" onclick="togglePassword()"></i>
+            <a href="#" class="lupa-password">Lupa?</a>
+        </div>
+        
+        <p id="error-msg">Email atau password salah.</p>
+
+        <button id="btn-login" class="btn-login" onclick="loginFirebase()" disabled>Log In</button>
+        
+        <div class="login-hp">
+            <a href="#">Log in dengan no. handphone</a>
+        </div>
+    </div>
+
+    <!-- DAFTAR -->
+    <div class="bottom-section">
+        Belum punya akun? <a href="register.html">Daftar</a>
+    </div>
+
+    <!-- FINGERPRINT TOGGLE -->
+    <div class="fingerprint-section">
+        <div class="fingerprint-left">
+            <i class="fa fa-fingerprint"></i>
+            <span>Aktifkan Autentikasi Sidik Jari</span>
+            <i class="fa-regular fa-circle-question"></i>
+        </div>
+        <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <!-- SCRIPT FIREBASE -->
+    <script type="module">
+        // Import Firebase Auth
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        // Konfigurasi dari Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0",
+            authDomain: "mading-cf676.firebaseapp.com",
+            projectId: "mading-cf676",
+            storageBucket: "mading-cf676.firebasestorage.app",
+            messagingSenderId: "72175203671",
+            appId: "1:72175203671:web:7a0676a55beb64bc96ba12",
+            measurementId: "G-590P9LLK7J"
+        };
+
+        // Inisialisasi
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Fungsi Login ke Firebase
+        window.loginFirebase = () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('error-msg');
+
+            btn.innerHTML = "Memuat...";
+            errorMsg.style.display = "none";
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Berhasil login! 
+                    const user = userCredential.user;
+                    console.log("Login sukses:", user.email);
+                    
+                    // KARENA INI DIPANGGIL SAAT MAU CHECKOUT:
+                    // Otomatis arahkan user ke halaman checkout.html setelah sukses login
+                    window.location.href = "checkout.html";
+                })
+                .catch((error) => {
+                    console.error("Error kode:", error.code, "Pesan:", error.message);
+                    errorMsg.style.display = "block";
+                    errorMsg.innerText = "Gagal login. Periksa email & password Anda.";
+                    btn.innerHTML = "Log In";
+                });
+        };
+    </script>
+
+    <!-- SCRIPT UI LOGIC -->
+    <script>
+        // Logika untuk mengubah warna tombol jika input terisi
+        function checkInputs() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btn-login');
+
+            if(email.length > 0 && password.length > 0) {
+                btn.classList.add('active');
+                btn.removeAttribute('disabled');
+            } else {
+                btn.classList.remove('active');
+                btn.setAttribute('disabled', 'true');
+            }
+        }
+
+        // Logika Show/Hide Password
+        function togglePassword() {
+            const pwInput = document.getElementById('password');
+            const icon = document.getElementById('toggle-pw');
+
+            if (pwInput.type === "password") {
+                pwInput.type = "text";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                pwInput.type = "password";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+    </script>
+</body>
+</html>
