@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keranjang Saya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RESET & DASAR */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; color: #333; padding-top: 60px; padding-bottom: 120px; }
+
+        /* HEADER */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; background: #fff; height: 60px;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; font-size: 18px; }
+        .header-right { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+        .header-right i { font-size: 20px; color: #ee4d2d; }
+
+        /* LIST KERANJANG */
+        .cart-list { background: #fff; margin-bottom: 10px; }
+        .cart-item {
+            display: flex; padding: 15px; border-bottom: 1px solid #f0f0f0; align-items: stretch;
+        }
+        
+        /* CHECKBOX KUSTOM */
+        .checkbox-container { display: flex; align-items: center; justify-content: center; padding-right: 15px; }
+        input[type="checkbox"] { width: 20px; height: 20px; accent-color: #ee4d2d; }
+
+        /* KONTEN PRODUK */
+        .item-image { width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee; border-radius: 4px; margin-right: 15px; }
+        .item-details { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .item-title { font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 5px; }
+        
+        .item-variant { background: #f9f9f9; padding: 5px; font-size: 11px; color: #555; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
+        .item-variant i { margin-left: 5px; }
+
+        .badges { display: flex; gap: 5px; margin-bottom: 5px; }
+        .badge { font-size: 10px; padding: 2px 4px; border-radius: 2px; border: 1px solid #ee4d2d; color: #ee4d2d; }
+        
+        .item-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .item-price { color: #ee4d2d; font-weight: bold; font-size: 14px; }
+        
+        /* KUANTITAS MATA UANG */
+        .qty-controls { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 3px; }
+        .qty-btn { background: #fff; border: none; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+        .qty-input { width: 35px; height: 25px; text-align: center; border: none; border-left: 1px solid #ddd; border-right: 1px solid #ddd; font-size: 13px; }
+
+        /* VOUCHER PROMO BAR */
+        .promo-bar { background: #fff; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-top: 10px; }
+        .promo-bar i.fa-ticket-alt { color: #ee4d2d; margin-right: 10px; font-size: 16px; }
+
+        /* CHECKOUT BAR */
+        .checkout-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #fff;
+            display: flex; flex-direction: column; z-index: 100; box-shadow: 0 -1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .checkout-top { padding: 10px 15px; display: flex; align-items: center; font-size: 13px; border-bottom: 1px solid #eee; }
+        .checkout-top i.fa-coins { color: #f6a700; margin-right: 10px; font-size: 16px; }
+        
+        .checkout-main { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .checkout-left { display: flex; align-items: center; padding-left: 15px; gap: 10px; font-size: 13px; }
+        .checkout-middle { text-align: right; flex-grow: 1; padding-right: 15px; }
+        .total-text { font-size: 12px; }
+        .total-price { color: #ee4d2d; font-size: 16px; font-weight: bold; }
+        .btn-checkout { background: #ee4d2d; color: #fff; height: 100%; padding: 0 25px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .btn-checkout:disabled { background: #ccc; cursor: not-allowed; }
+
+        .loading-text { text-align: center; padding: 20px; font-size: 14px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <i class="fa fa-arrow-left" onclick="history.back()"></i>
+            <span>Keranjang Saya</span>
+        </div>
+        <div class="header-right">
+            <span>Ubah</span>
+            <i class="fa fa-comments"></i>
+        </div>
+    </header>
+
+    <!-- LIST KERANJANG -->
+    <main class="cart-list" id="cart-container">
+        <div class="loading-text">Memuat keranjang Anda...</div>
+        <!-- Item keranjang akan dirender oleh Firebase -->
+    </main>
+
+    <!-- PROMO & VOUCHER -->
+    <div class="promo-bar">
+        <div style="display:flex; align-items:center;">
+            <i class="fa fa-ticket-alt"></i> Voucher
+        </div>
+        <div style="color: #888;">Gunakan/ masukkan kode <i class="fa fa-chevron-right" style="margin-left:5px; font-size:10px;"></i></div>
+    </div>
+
+    <!-- BOTTOM CHECKOUT BAR -->
+    <div class="checkout-bar">
+        <div class="checkout-top">
+            <i class="fa fa-coins"></i> Tidak ada produk yang dipilih <i class="fa fa-circle-question" style="margin-left:5px; color:#ccc;"></i>
+            <!-- Toggle CSS sederhana untuk koin -->
+            <div style="margin-left:auto; width:34px; height:20px; background:#eee; border-radius:10px; position:relative;">
+                <div style="width:16px; height:16px; background:#fff; border-radius:50%; position:absolute; top:2px; left:2px; box-shadow:0 1px 2px rgba(0,0,0,0.2);"></div>
+            </div>
+        </div>
+        <div class="checkout-main">
+            <div class="checkout-left">
+                <input type="checkbox" id="check-all" onchange="toggleAll()">
+                <span>Semua</span>
+            </div>
+            <div class="checkout-middle">
+                <div class="total-text">Total</div>
+                <div class="total-price" id="grand-total">Rp0</div>
+            </div>
+            <!-- Mengarah ke login.html sebelum checkout, sesuai alur sebelumnya -->
+            <button class="btn-checkout" id="btn-checkout" onclick="proceedToCheckout()" disabled>Checkout (0)</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT FIREBASE & LOGIKA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0",
+            authDomain: "mading-cf676.firebaseapp.com",
+            projectId: "mading-cf676",
+            storageBucket: "mading-cf676.firebasestorage.app",
+            messagingSenderId: "72175203671",
+            appId: "1:72175203671:web:7a0676a55beb64bc96ba12",
+            measurementId: "G-590P9LLK7J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State untuk menyimpan data yang diambil dari DB
+        let cartItemsData = [];
+
+        const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        async function fetchCart() {
+            const container = document.getElementById('cart-container');
+            try {
+                // Ambil data dari collection "carts"
+                const q = collection(db, "carts");
+                const querySnapshot = await getDocs(q);
+                
+                container.innerHTML = '';
+                cartItemsData = [];
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div class="loading-text">Keranjang Anda kosong.</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    data.id = docSnap.id; // simpan ID dokumen
+                    cartItemsData.push(data);
+
+                    // Struktur field di Firebase: title, price, quantity, image_base64, variant
+                    const itemHTML = `
+                        <div class="cart-item" id="item-${data.id}">
+                            <div class="checkbox-container">
+                                <input type="checkbox" class="item-checkbox" data-id="${data.id}" data-price="${data.price}" onchange="window.calculateTotal()">
+                            </div>
+                            <img src="${data.image_base64}" alt="Produk" class="item-image">
+                            <div class="item-details">
+                                <div class="item-title">${data.title}</div>
+                                <div>
+                                    <div class="item-variant">${data.variant || 'Pilih Variasi'} <i class="fa fa-chevron-down"></i></div>
+                                </div>
+                                <div class="badges">
+                                    <div class="badge">Pre-Order</div>
+                                </div>
+                                <div class="item-bottom">
+                                    <div class="item-price">${formatRupiah(data.price)}</div>
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="window.updateQty('${data.id}', -1)">-</button>
+                                        <input type="text" class="qty-input" id="qty-${data.id}" value="${data.quantity}" readonly>
+                                        <button class="qty-btn" onclick="window.updateQty('${data.id}', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += itemHTML;
+                });
+            } catch (error) {
+                console.error("Gagal memuat keranjang:", error);
+                container.innerHTML = '<div class="loading-text" style="color:red;">Gagal memuat data keranjang.</div>';
+            }
+        }
+
+        // FUNGSI UPDATE QUANTITY SECARA REAL-TIME KE FIREBASE
+        window.updateQty = async (itemId, change) => {
+            const input = document.getElementById(`qty-${itemId}`);
+            let currentQty = parseInt(input.value);
+            let newQty = currentQty + change;
+            
+            if (newQty < 1) return; // minimal 1
+
+            // Update UI dulu agar responsif
+            input.value = newQty;
+            
+            // Cari data di local array dan update
+            const item = cartItemsData.find(i => i.id === itemId);
+            if (item) item.quantity = newQty;
+
+            window.calculateTotal();
+
+            // Update ke Firebase (Background)
+            try {
+                const itemRef = doc(db, "carts", itemId);
+                await updateDoc(itemRef, { quantity: newQty });
+            } catch (e) {
+                console.error("Gagal update Qty di DB", e);
+            }
+        };
+
+        // FUNGSI MENGHITUNG TOTAL HARGA
+        window.calculateTotal = () => {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            let total = 0;
+            let count = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const itemId = cb.getAttribute('data-id');
+                    const price = parseFloat(cb.getAttribute('data-price'));
+                    const qty = parseInt(document.getElementById(`qty-${itemId}`).value);
+                    total += (price * qty);
+                    count++;
+                }
+            });
+
+            document.getElementById('grand-total').innerText = total > 0 ? formatRupiah(total) : 'Rp0';
+            
+            const btn = document.getElementById('btn-checkout');
+            btn.innerText = `Checkout (${count})`;
+            btn.disabled = count === 0;
+
+            // Logika Check All
+            const checkAllBox = document.getElementById('check-all');
+            if(checkboxes.length > 0 && count === checkboxes.length) {
+                checkAllBox.checked = true;
+            } else {
+                checkAllBox.checked = false;
+            }
+        };
+
+        // FUNGSI CHECK ALL
+        window.toggleAll = () => {
+            const checkAllBox = document.getElementById('check-all');
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            checkboxes.forEach(cb => {
+                cb.checked = checkAllBox.checked;
+            });
+            window.calculateTotal();
+        };
+
+        // FUNGSI MELANJUTKAN KE CHECKOUT
+        window.proceedToCheckout = () => {
+            // Logika: kumpulkan item yang tercentang, lalu arahkan ke halaman login (sesuai instruksi Anda sebelumnya)
+            // karena user harus login dulu sebelum bayar.
+            // Di sistem nyata, id item yang dicentang bisa dilempar via URL parameter atau Session Storage.
+            window.location.href = "login.html"; 
+        };
+
+        // Jalankan fetch saat halaman dimuat
+        window.onload = fetchCart;
+    </script>
+</body>
+</html>
