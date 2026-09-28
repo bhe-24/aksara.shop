@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil Saya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; color: #333; padding-bottom: 70px; }
+
+        /* HEADER ORANYE */
+        .header-profile {
+            background: linear-gradient(to bottom right, #ee4d2d, #ff7337);
+            color: white; padding: 20px 15px 40px 15px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-img { width: 60px; height: 60px; border-radius: 50%; background: white; object-fit: cover; border: 2px solid white; cursor: pointer; }
+        .user-details { display: flex; flex-direction: column; gap: 5px; }
+        .user-name { font-size: 18px; font-weight: bold; }
+        .user-stats { font-size: 12px; display: flex; gap: 10px; }
+        .badge-member { background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; }
+        
+        .header-icons i { font-size: 22px; margin-left: 15px; cursor: pointer; }
+
+        /* KARTU VIP (Opsional) */
+        .vip-card {
+            background: #fff; margin: -20px 15px 15px 15px; border-radius: 8px; padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 13px; font-weight: bold; color: #8a5a19;
+        }
+
+        /* SECTION PESANAN */
+        .section-block { background: #fff; margin-bottom: 10px; }
+        .section-header {
+            display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px;
+        }
+        .section-header a { color: #888; text-decoration: none; font-size: 13px; }
+        
+        .order-icons { display: flex; justify-content: space-around; padding: 20px 10px; }
+        .order-item { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #555; position: relative; cursor: pointer; }
+        .order-item i { font-size: 24px; color: #333; }
+        
+        /* Badge Notifikasi Angka */
+        .badge-num { position: absolute; top: -5px; right: -5px; background: #ee4d2d; color: white; font-size: 10px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid white; display: none; }
+
+        /* MENU LAINNYA */
+        .menu-list { list-style: none; }
+        .menu-list li {
+            display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer;
+        }
+        .menu-list li i { font-size: 18px; width: 30px; text-align: center; margin-right: 10px; }
+        .menu-list li .menu-text { flex-grow: 1; font-size: 14px; }
+        .menu-list li .fa-chevron-right { color: #ccc; font-size: 14px; }
+
+        .icon-blue { color: #0056b3; }
+        .icon-green { color: #28a745; }
+        .icon-red { color: #dc3545; }
+
+        /* BOTTOM NAVIGATION */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; height: 60px;
+            display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #ddd; z-index: 999;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #757575; font-size: 11px; gap: 4px; }
+        .nav-item.active { color: #ee4d2d; }
+        .nav-item i { font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER PROFILE -->
+    <div class="header-profile">
+        <div class="user-info">
+            <img src="https://via.placeholder.com/60" id="user-photo" class="user-img" onclick="window.location.href='profil_saya.html'">
+            <div class="user-details">
+                <div class="user-name" id="user-name">Memuat...</div>
+                <div class="badge-member">Member Silver <i class="fa fa-chevron-right" style="font-size: 8px;"></i></div>
+                <div class="user-stats">
+                    <span id="following-count">0 Mengikuti</span>
+                    <span id="follower-count">0 Pengikut</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-icons">
+            <i class="fa fa-cog" onclick="window.location.href='profil_saya.html'"></i>
+            <i class="fa fa-shopping-cart" onclick="window.location.href='cart.html'"></i>
+            <i class="fa fa-comments"></i>
+        </div>
+    </div>
+
+    <!-- VIP BANNER -->
+    <div class="vip-card">
+        <div><i class="fa fa-crown"></i> Temukan Buku Terbaru Bulan Ini!</div>
+        <i class="fa fa-chevron-right" style="color: #ccc;"></i>
+    </div>
+
+    <!-- PESANAN SAYA -->
+    <div class="section-block">
+        <div class="section-header">
+            <strong>Pesanan Saya</strong>
+            <a href="pesanan.html">Lihat Riwayat Pesanan <i class="fa fa-chevron-right"></i></a>
+        </div>
+        <div class="order-icons">
+            <div class="order-item" onclick="window.location.href='pesanan.html?status=belum_bayar'">
+                <i class="fa-regular fa-credit-card"></i>
+                <div class="badge-num" id="badge-belum-bayar">0</div>
+                <span>Belum Bayar</span>
+            </div>
+            <div class="order-item" onclick="window.location.href='pesanan.html?status=dikemas'">
+                <i class="fa-solid fa-box"></i>
+                <div class="badge-num" id="badge-dikemas">0</div>
+                <span>Dikemas</span>
+            </div>
+            <div class="order-item" onclick="window.location.href='pesanan.html?status=dikirim'">
+                <i class="fa-solid fa-truck-fast"></i>
+                <div class="badge-num" id="badge-dikirim">0</div>
+                <span>Dikirim</span>
+            </div>
+            <div class="order-item" onclick="window.location.href='pesanan.html?status=penilaian'">
+                <i class="fa-regular fa-star"></i>
+                <div class="badge-num" id="badge-penilaian">0</div>
+                <span>Beri Penilaian</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU LAINNYA -->
+    <div class="section-block">
+        <ul class="menu-list">
+            <li onclick="window.location.href='alamat_baru.html'">
+                <i class="fa fa-map-marker-alt icon-blue"></i>
+                <span class="menu-text">Alamat Saya</span>
+                <i class="fa fa-chevron-right"></i>
+            </li>
+            <li>
+                <i class="fa fa-ticket-alt icon-green"></i>
+                <span class="menu-text">Voucher Saya</span>
+                <i class="fa fa-chevron-right"></i>
+            </li>
+            <li>
+                <i class="fa fa-heart icon-red"></i>
+                <span class="menu-text">Buku Favorit</span>
+                <i class="fa fa-chevron-right"></i>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section-block">
+        <ul class="menu-list">
+            <li>
+                <i class="fa fa-question-circle" style="color:#555;"></i>
+                <span class="menu-text">Pusat Bantuan</span>
+                <i class="fa fa-chevron-right"></i>
+            </li>
+            <li onclick="logoutFirebase()">
+                <i class="fa fa-sign-out-alt icon-red"></i>
+                <span class="menu-text" style="color:#dc3545;">Keluar</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fa fa-home"></i><span>Beranda</span>
+        </a>
+        <a href="bookmark.html" class="nav-item">
+            <i class="fa fa-bookmark"></i><span>Bookmark</span>
+        </a>
+        <a href="merch.html" class="nav-item">
+            <i class="fa fa-box"></i><span>Merch</span>
+        </a>
+        <a href="profil.html" class="nav-item active">
+            <i class="fa fa-user"></i><span>Profil</span>
+        </a>
+    </nav>
+
+    <!-- SCRIPT FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0", authDomain: "mading-cf676.firebaseapp.com", projectId: "mading-cf676", storageBucket: "mading-cf676.firebasestorage.app", messagingSenderId: "72175203671", appId: "1:72175203671:web:7a0676a55beb64bc96ba12" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // 1. Ambil Nama & Foto dari Firebase
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    document.getElementById('user-name').innerText = data.nama || user.email.split('@')[0];
+                    if(data.foto_profil) document.getElementById('user-photo').src = data.foto_profil;
+                } else {
+                    document.getElementById('user-name').innerText = user.email.split('@')[0];
+                }
+
+                // 2. Hitung jumlah pesanan untuk Badge (Menunggu Konfirmasi)
+                countOrders(user.uid);
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        async function countOrders(uid) {
+            try {
+                // Contoh menghitung status "Menunggu Konfirmasi Admin" untuk badge "Belum Bayar/Dikemas"
+                const q = query(collection(db, "orders"), where("user_id", "==", uid), where("status", "==", "Menunggu Konfirmasi Admin"));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    const badge = document.getElementById('badge-belum-bayar');
+                    badge.innerText = snap.size;
+                    badge.style.display = 'flex';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        window.logoutFirebase = () => {
+            if(confirm("Apakah Anda yakin ingin keluar?")) {
+                signOut(auth).then(() => window.location.href = "login.html");
+            }
+        };
+    </script>
+</body>
+</html>
