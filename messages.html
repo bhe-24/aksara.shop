@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daftar Pesan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #fff; color: #333; padding-top: 100px; }
+
+        /* HEADER */
+        .header { position: fixed; top: 0; left: 0; width: 100%; background: #fff; height: 50px; display: flex; align-items: center; padding: 0 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); z-index: 100; font-size: 18px; }
+        .header i { font-size: 20px; color: #ee4d2d; margin-right: 15px; cursor: pointer; }
+
+        /* TABS */
+        .tab-container { position: fixed; top: 50px; left: 0; width: 100%; background: #fff; display: flex; border-bottom: 1px solid #eee; z-index: 100; padding: 10px 15px 0 15px; gap: 15px; }
+        .tab-btn { padding: 5px 15px; border-radius: 15px; font-size: 13px; color: #555; background: #f5f5f5; border: 1px solid transparent; cursor: pointer; position: relative; }
+        .tab-btn.active { color: #ee4d2d; border-color: #ee4d2d; background: #fff5f5; font-weight: bold; }
+        
+        .badge-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ee4d2d; border-radius: 50%; display: none; }
+        .tab-btn.has-notif .badge-dot { display: block; }
+
+        /* LIST CHAT */
+        .chat-list { padding: 0 15px; }
+        .chat-item { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        
+        .shop-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; margin-right: 15px; }
+        
+        .chat-content { flex-grow: 1; overflow: hidden; }
+        .chat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .shop-name { font-size: 14px; font-weight: bold; color: #333; }
+        .chat-time { font-size: 11px; color: #888; }
+        
+        .chat-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .last-msg { font-size: 13px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 80%; }
+        
+        .badge-unread { background: #ee4d2d; color: white; font-size: 10px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <i class="fa fa-arrow-left" onclick="window.location.href='index.html'"></i>
+        <span>Chat</span>
+    </header>
+
+    <div class="tab-container">
+        <div class="tab-btn active has-notif">Semua <div class="badge-dot"></div></div>
+        <div class="tab-btn">Aktif</div>
+    </div>
+
+    <div class="chat-list" id="chat-list-container">
+        <!-- Chat akan dimuat via JS. Untuk toko buku tunggal, kita hanya tampilkan 1 chat -->
+        <p style="text-align: center; color: #888; font-size: 13px; margin-top: 20px;">Memuat obrolan...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0", authDomain: "mading-cf676.firebaseapp.com", projectId: "mading-cf676", storageBucket: "mading-cf676.firebasestorage.app", messagingSenderId: "72175203671", appId: "1:72175203671:web:7a0676a55beb64bc96ba12" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadChatList();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        function loadChatList() {
+            // Karena ini single-store (toko buku Anda), kita tampilkan 1 blok chat statis
+            // yang mengarah ke chat_room.html
+            const container = document.getElementById('chat-list-container');
+            container.innerHTML = `
+                <div class="chat-item" onclick="window.location.href='chat_room.html'">
+                    <img src="https://imgur.com/1xvp0t2" class="shop-avatar" alt="Logo Toko">
+                    <div class="chat-content">
+                        <div class="chat-top">
+                            <span class="shop-name">Toko Buku Resmi</span>
+                            <span class="chat-time">Baru saja</span>
+                        </div>
+                        <div class="chat-bottom">
+                            <span class="last-msg">Halo! Ada yang bisa kami bantu?</span>
+                            <div class="badge-unread">1</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
