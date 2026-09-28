@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Toko Buku</title>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RESET & DASAR - MOBILE FIRST */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            /* Memberikan ruang agar konten tidak tertutup header & footer */
+            padding-top: 60px; 
+            padding-bottom: 70px;
+        }
+
+        /* HEADER (STICKY) */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to right, #ff6a00, #ee0979); /* Warna ala referensi e-commerce */
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 999;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .search-bar {
+            flex: 1;
+            background: #fff;
+            height: 35px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin-right: 15px;
+        }
+        .search-bar i.fa-search {
+            color: #ee0979;
+            margin-right: 8px;
+        }
+        .search-bar input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+        .search-bar i.fa-camera {
+            color: #888;
+            cursor: pointer;
+        }
+        .header-icons {
+            display: flex;
+            gap: 15px;
+        }
+        .header-icons i {
+            color: #fff;
+            font-size: 20px;
+            position: relative;
+        }
+        /* Badge notifikasi merah di ikon */
+        .badge-icon {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: white;
+            color: #ee0979;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 10px;
+            border: 1px solid #ee0979;
+        }
+
+        /* GRID PRODUK */
+        .product-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+        .product-card {
+            background: #fff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-decoration: none; /* Karena ini akan dibungkus tag <a> */
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            background-color: #eee;
+        }
+        .product-info {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .product-title {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Maksimal 2 baris teks */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .badge-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .badge-ori { background: #d0011b; color: #fff; padding: 2px 4px; border-radius: 2px; }
+        .badge-star { background: #ff9100; color: #fff; padding: 2px 4px; border-radius: 2px; }
+        
+        .product-bottom {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .product-price {
+            color: #ee0979;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .product-sold {
+            font-size: 11px;
+            color: #757575;
+        }
+
+        /* BOTTOM NAVIGATION (FIXED) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            height: 60px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #ddd;
+            z-index: 999;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #757575;
+            font-size: 11px;
+            gap: 4px;
+        }
+        .nav-item i {
+            font-size: 20px;
+        }
+        .nav-item.active {
+            color: #ee0979; /* Warna aktif */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STICKY HEADER -->
+    <header>
+        <div class="search-bar">
+            <!-- Ikon cari akan mentrigger fungsi pencarian AI Groq nantinya -->
+            <i class="fa fa-search" id="btn-search-ai" onclick="triggerAISearch()"></i>
+            <input type="text" id="search-input" placeholder="Cari buku dengan AI...">
+            <!-- Tombol foto (berdasarkan referensi gambar) -->
+            <i class="fa fa-camera" id="btn-camera"></i>
+        </div>
+        <div class="header-icons">
+            <a href="cart.html"><i class="fa fa-shopping-cart"><span class="badge-icon" id="cart-count">0</span></i></a>
+            <a href="messages.html"><i class="fa fa-comments"><span class="badge-icon" id="msg-count">0</span></i></a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT: GRID PRODUK -->
+    <main>
+        <!-- Tempat produk akan dirender dari Firebase -->
+        <div class="product-container" id="product-list">
+            <!-- Loading indicator sebelum data Firebase masuk -->
+            <p style="text-align: center; width: 200%; padding: 20px; color: #888;">Memuat data buku...</p>
+        </div>
+    </main>
+
+    <!-- STICKY BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fa fa-home"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="bookmark.html" class="nav-item">
+            <i class="fa fa-bookmark"></i>
+            <span>Bookmark</span>
+        </a>
+        <a href="merch.html" class="nav-item">
+            <i class="fa fa-box"></i>
+            <span>Merch</span>
+        </a>
+        <a href="profil.html" class="nav-item">
+            <i class="fa fa-user"></i>
+            <span>Profil</span>
+        </a>
+    </nav>
+
+    <!-- SCRIPT FIREBASE & LOGIKA APLIKASI -->
+    <script type="module">
+        // Import Firebase (sesuai instruksi)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+        // Import Firestore untuk Database (TANPA DATA DUMMY)
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0",
+            authDomain: "mading-cf676.firebaseapp.com",
+            projectId: "mading-cf676",
+            storageBucket: "mading-cf676.firebasestorage.app",
+            messagingSenderId: "72175203671",
+            appId: "1:72175203671:web:7a0676a55beb64bc96ba12",
+            measurementId: "G-590P9LLK7J"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // Fungsi format Rupiah
+        const formatRupiah = (angka) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        };
+
+        // Fungsi untuk mengambil data murni dari Firebase
+        async function fetchProducts() {
+            const productListElement = document.getElementById('product-list');
+            
+            try {
+                // Asumsi nama koleksi di Firebase Firestore Anda adalah 'books'
+                const querySnapshot = await getDocs(collection(db, "books"));
+                
+                // Kosongkan container dari tulisan loading
+                productListElement.innerHTML = '';
+
+                if(querySnapshot.empty) {
+                    productListElement.innerHTML = '<p style="text-align:center; width:200%; padding:20px;">Belum ada buku di database.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Struktur data yang diharapkan dari Firebase:
+                    // title, price, sold_count, rating, image_base64
+                    
+                    const soldCount = data.sold_count || 0;
+                    const rating = data.rating || 0;
+                    
+                    // LOGIKA BADGE SESUAI INSTRUKSI
+                    let badgeHtml = '';
+                    if (soldCount >= 100) {
+                        badgeHtml += `<span class="badge-ori">Mall | ORI</span> `;
+                    } else if (soldCount >= 50) {
+                        badgeHtml += `<span class="badge-star">Star+</span> `;
+                    }
+
+                    // Format terjual (misal: 1200 -> 1.2RB terjual)
+                    let displaySold = soldCount >= 1000 ? (soldCount/1000).toFixed(1) + 'RB+ terjual' : soldCount + ' terjual';
+
+                    // RENDER HTML CARD
+                    // Setiap card dibungkus tag <a> agar jika dipencet masuk ke preview barang (multi-page)
+                    const productCard = `
+                        <a href="preview.html?id=${doc.id}" class="product-card">
+                            <img src="${data.image_base64}" alt="${data.title}" class="product-img">
+                            <div class="product-info">
+                                <div class="product-title">
+                                    <div class="badge-container">${badgeHtml}</div>
+                                    ${data.title}
+                                </div>
+                                <div style="font-size: 11px; color: #ff9100; margin-top: 4px;">
+                                    <i class="fa fa-star"></i> ${rating}
+                                </div>
+                                <div class="product-bottom">
+                                    <span class="product-price">${formatRupiah(data.price)}</span>
+                                    <span class="product-sold">${displaySold}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    productListElement.innerHTML += productCard;
+                });
+            } catch (error) {
+                console.error("Error fetching data dari Firebase: ", error);
+                productListElement.innerHTML = '<p style="color:red; text-align:center; width:200%;">Gagal memuat data dari database.</p>';
+            }
+        }
+
+        // Panggil fungsi saat halaman dimuat
+        window.onload = fetchProducts;
+    </script>
+
+    <!-- Script terpisah untuk integrasi API AI (Groq) nantinya -->
+    <script>
+        function triggerAISearch() {
+            const query = document.getElementById('search-input').value;
+            if(query) {
+                // Diarahkan ke endpoint API lokal / backend yang terhubung ke Groq AI
+                // Halaman tidak single page, jadi kita bisa arahkan atau fetch ke api/...js
+                console.log("Mengirim query ke Groq AI: ", query);
+                // Contoh implementasi perpindahan halaman pencarian AI:
+                // window.location.href = `search_result.html?ai_query=${encodeURIComponent(query)}`;
+                
+                // Atau panggil file api/groq_search.js via fetch
+                /*
+                fetch(`/api/groq_search.js?q=${query}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        // handle hasil AI
+                    });
+                */
+               alert('Fitur pencarian AI sedang dihubungkan ke /api/groq_search.js');
+            }
+        }
+    </script>
+</body>
+</html>
