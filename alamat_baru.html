@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Alamat Baru</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RESET & DASAR */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; color: #333; padding-top: 50px; padding-bottom: 70px; }
+
+        /* HEADER */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; background: #fff; height: 50px;
+            display: flex; align-items: center; padding: 0 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); z-index: 100; font-size: 18px;
+        }
+        .header i { font-size: 20px; color: #ee4d2d; margin-right: 15px; cursor: pointer; }
+        
+        /* BLOK KONTEN */
+        .content-block { background: #fff; margin-top: 10px; padding: 0 15px; }
+        .block-title { font-size: 14px; font-weight: bold; padding: 15px 0 5px 0; }
+
+        /* INPUT ROW */
+        .input-row { display: flex; align-items: center; border-bottom: 1px solid #f0f0f0; min-height: 50px; position: relative; }
+        .input-row:last-child { border-bottom: none; }
+        .input-row input { flex-grow: 1; border: none; outline: none; font-size: 14px; background: transparent; width: 100%; padding: 15px 0; }
+        .input-row input::placeholder { color: #bbb; }
+        .input-row i.fa-chevron-right { color: #ccc; font-size: 14px; position: absolute; right: 0; }
+
+        /* TOGGLE SWITCHES */
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; padding: 15px 0; font-size: 14px; }
+        .toggle-row:last-child { border-bottom: none; }
+        
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ddd; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: #28a745; }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* TANDAI SEBAGAI (KANTOR / RUMAH) */
+        .tag-group { display: flex; gap: 10px; }
+        .tag-btn { border: 1px solid #ddd; padding: 5px 15px; border-radius: 3px; font-size: 13px; color: #555; background: #fff; cursor: pointer; transition: 0.2s; }
+        .tag-btn.active { border-color: #ee4d2d; color: #ee4d2d; background: #fff5f5; }
+
+        /* BOTTOM BAR & TOMBOL SIMPAN */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 10px 15px; border-top: 1px solid #eee; z-index: 100; }
+        .btn-save { width: 100%; padding: 12px; background-color: #ee4d2d; color: white; border: none; border-radius: 3px; font-size: 16px; font-weight: 500; cursor: pointer; opacity: 0.4; transition: opacity 0.3s; }
+        .btn-save.active { opacity: 1; }
+
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 999; justify-content: center; align-items: center; font-weight: bold; color: #ee4d2d; }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loading-overlay">Menyimpan Alamat...</div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <i class="fa fa-arrow-left" onclick="history.back()"></i>
+        <span>Alamat Baru</span>
+    </header>
+
+    <!-- FORM ALAMAT -->
+    <div class="content-block">
+        <div class="block-title">Alamat</div>
+        
+        <div class="input-row">
+            <input type="text" id="nama" placeholder="Nama Lengkap" oninput="validateForm()">
+        </div>
+        <div class="input-row">
+            <input type="tel" id="telepon" placeholder="Nomor Telepon" oninput="validateForm()">
+        </div>
+        <div class="input-row" onclick="alert('Fitur dropdown wilayah akan diarahkan ke API Provinsi/Kota')">
+            <input type="text" id="wilayah" placeholder="Provinsi, Kota, Kecamatan, Kode Pos" readonly oninput="validateForm()">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+        <div class="input-row">
+            <input type="text" id="jalan" placeholder="Nama Jalan, Gedung, No. Rumah" oninput="validateForm()">
+        </div>
+        <div class="input-row">
+            <input type="text" id="detail" placeholder="Detail Lainnya (Cth: Blok / Unit No., Patokan)">
+        </div>
+    </div>
+
+    <!-- PENGATURAN ALAMAT -->
+    <div class="content-block" style="margin-top: 15px; padding-bottom: 10px;">
+        <div class="toggle-row">
+            <span>Atur sebagai Alamat Utama</span>
+            <label class="switch">
+                <input type="checkbox" id="isUtama" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-row">
+            <span>Atur sebagai Alamat Toko</span>
+            <label class="switch">
+                <input type="checkbox" id="isToko">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-row">
+            <span>Atur sebagai Alamat Pengembalian</span>
+            <label class="switch">
+                <input type="checkbox" id="isKembali">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-row" style="border-top: 1px solid #f0f0f0; margin-top: 10px; padding-top: 15px;">
+            <span>Tandai Sebagai:</span>
+            <div class="tag-group">
+                <div class="tag-btn" id="tag-kantor" onclick="selectTag('Kantor')">Kantor</div>
+                <div class="tag-btn active" id="tag-rumah" onclick="selectTag('Rumah')">Rumah</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOMBOL SIMPAN -->
+    <div class="bottom-bar">
+        <button class="btn-save" id="btn-save" onclick="simpanAlamat()" disabled>Simpan</button>
+    </div>
+
+    <!-- SCRIPT FIREBASE & LOGIKA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0",
+            authDomain: "mading-cf676.firebaseapp.com",
+            projectId: "mading-cf676",
+            storageBucket: "mading-cf676.firebasestorage.app",
+            messagingSenderId: "72175203671",
+            appId: "1:72175203671:web:7a0676a55beb64bc96ba12",
+            measurementId: "G-590P9LLK7J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUserUid = null;
+        let selectedLabel = 'Rumah'; // Default
+
+        // 1. CEK AUTENTIKASI DAN STATUS ALAMAT
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                // Cek apakah user sudah punya alamat di Firebase
+                const userDocRef = doc(db, "users", currentUserUid);
+                const userDocSnap = await getDoc(userDocRef);
+                
+                // JIKA ALAMAT SUDAH ADA, LANGSUNG LOMPAT KE CHECKOUT (Satu kali isi)
+                if (userDocSnap.exists() && userDocSnap.data().alamat_utama) {
+                    window.location.href = "checkout.html"; 
+                }
+            } else {
+                // Jika belum login, paksa ke halaman login
+                window.location.href = "login.html";
+            }
+        });
+
+        // 2. LOGIKA PILIH TAG (KANTOR/RUMAH)
+        window.selectTag = (tag) => {
+            selectedLabel = tag;
+            document.getElementById('tag-kantor').classList.remove('active');
+            document.getElementById('tag-rumah').classList.remove('active');
+            
+            if(tag === 'Kantor') document.getElementById('tag-kantor').classList.add('active');
+            if(tag === 'Rumah') document.getElementById('tag-rumah').classList.add('active');
+        };
+
+        // 3. LOGIKA VALIDASI FORM HIDUPKAN TOMBOL SIMPAN
+        window.validateForm = () => {
+            const nama = document.getElementById('nama').value;
+            const telepon = document.getElementById('telepon').value;
+            const jalan = document.getElementById('jalan').value;
+            // Anggap wilayah otomatis terisi di sistem asli. Di sini kita bypass wilayah untuk demo.
+            const btnSave = document.getElementById('btn-save');
+
+            if (nama.length > 2 && telepon.length > 8 && jalan.length > 5) {
+                btnSave.classList.add('active');
+                btnSave.disabled = false;
+            } else {
+                btnSave.classList.remove('active');
+                btnSave.disabled = true;
+            }
+        };
+
+        // 4. SIMPAN KE FIREBASE
+        window.simpanAlamat = async () => {
+            if (!currentUserUid) return alert("Anda harus login terlebih dahulu.");
+            
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            const alamatData = {
+                nama_penerima: document.getElementById('nama').value,
+                telepon: document.getElementById('telepon').value,
+                jalan: document.getElementById('jalan').value,
+                detail: document.getElementById('detail').value,
+                label: selectedLabel,
+                isUtama: document.getElementById('isUtama').checked,
+                isToko: document.getElementById('isToko').checked,
+                isKembali: document.getElementById('isKembali').checked
+            };
+
+            try {
+                // Menyimpan data alamat ke dokumen User di Firestore
+                const userRef = doc(db, "users", currentUserUid);
+                await setDoc(userRef, { alamat_utama: alamatData }, { merge: true });
+                
+                // Setelah berhasil, arahkan ke Checkout sesungguhnya
+                window.location.href = "checkout.html";
+            } catch (error) {
+                console.error("Gagal menyimpan alamat: ", error);
+                alert("Terjadi kesalahan sistem saat menyimpan alamat.");
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
