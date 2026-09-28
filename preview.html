@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Detail Buku</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RESET & DASAR */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; color: #333; padding-bottom: 60px; }
+
+        /* HEADER OVERLAY */
+        .header-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between;
+            padding: 15px; z-index: 100; pointer-events: none;
+        }
+        .header-overlay .icon-btn {
+            background: rgba(0,0,0,0.4); color: white; width: 35px; height: 35px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; pointer-events: auto; cursor: pointer;
+        }
+        .right-icons { display: flex; gap: 10px; }
+
+        /* GAMBAR PRODUK & THUMBNAIL */
+        .product-image-container { background: #fff; width: 100%; aspect-ratio: 1/1; }
+        .product-image-container img { width: 100%; height: 100%; object-fit: cover; }
+        .thumbnail-container {
+            display: flex; gap: 10px; padding: 10px; background: #fff; overflow-x: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .thumbnail-img { width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+        .thumbnail-img.active { border: 2px solid #ee4d2d; }
+
+        /* VOUCHER BANNER */
+        .voucher-banner {
+            background: linear-gradient(to right, #ff7300, #ee4d2d); color: white; padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+        }
+        .countdown { display: flex; gap: 5px; }
+        .countdown span { background: #333; color: white; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
+
+        /* INFO PRODUK */
+        .product-info { padding: 15px; background: #fff; margin-bottom: 8px; }
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .price { color: #ee4d2d; font-size: 22px; font-weight: bold; }
+        .sold-count { font-size: 12px; color: #757575; }
+        
+        .title { font-size: 15px; line-height: 1.4; margin-bottom: 10px; }
+        .badge-mall { background: #d0011b; color: white; font-size: 10px; padding: 2px 5px; border-radius: 3px; margin-right: 5px; }
+
+        /* TAGAR */
+        .tags-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .tag-item { background: #f0f0f0; color: #ee4d2d; padding: 5px 10px; border-radius: 15px; font-size: 12px; text-decoration: none; border: 1px solid #ee4d2d; }
+
+        /* DESKRIPSI DROPDOWN */
+        .description-accordion { background: #fff; margin-bottom: 8px; }
+        .desc-summary { 
+            padding: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; list-style: none;
+        }
+        .desc-summary::-webkit-details-marker { display: none; }
+        .desc-content { padding: 15px; font-size: 14px; color: #555; line-height: 1.5; white-space: pre-wrap; }
+
+        /* PENILAIAN */
+        .reviews-section { background: #fff; padding: 15px; margin-bottom: 8px; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .stars { color: #ffce3d; font-size: 12px; }
+        .review-item { margin-bottom: 15px; border-bottom: 1px solid #f9f9f9; padding-bottom: 10px; }
+        .reviewer-name { font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .review-text { font-size: 13px; color: #444; margin-top: 5px; }
+
+        /* PRODUK MIRIP (GRID) */
+        .similar-section { background: #fff; padding: 15px; }
+        .section-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #ee4d2d; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        
+        .product-card { border: 1px solid #eee; border-radius: 4px; padding: 8px; text-decoration: none; color: inherit; }
+        .product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        .product-card .card-title { font-size: 12px; margin: 5px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-card .card-price { color: #ee4d2d; font-weight: bold; font-size: 13px; }
+
+        /* BOTTOM BAR */
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff;
+            display: flex; border-top: 1px solid #ddd; z-index: 100;
+        }
+        .btn-chat, .btn-cart { width: 25%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #555; border-right: 1px solid #ddd; }
+        .btn-buy { width: 50%; background: #ee4d2d; color: white; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: bold; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY NAV -->
+    <div class="header-overlay">
+        <div class="icon-btn" onclick="history.back()"><i class="fa fa-arrow-left"></i></div>
+        <div class="right-icons">
+            <div class="icon-btn" onclick="window.location.href='cart.html'"><i class="fa fa-shopping-cart"></i></div>
+            <div class="icon-btn"><i class="fa fa-ellipsis-v"></i></div>
+        </div>
+    </div>
+
+    <!-- MAIN IMAGE & THUMBNAILS -->
+    <div class="product-image-container">
+        <img id="main-image" src="" alt="Loading...">
+    </div>
+    <div class="thumbnail-container" id="thumbnail-list">
+        <!-- Thumbnails dimuat via JS -->
+    </div>
+
+    <!-- VOUCHER -->
+    <div class="voucher-banner">
+        <div><i class="fa fa-ticket-alt"></i> Voucher Diskon Tersedia</div>
+        <div class="countdown" id="countdown-timer">
+            <span id="h">00</span>:<span id="m">59</span>:<span id="s">48</span>
+        </div>
+    </div>
+
+    <!-- INFO PRODUK -->
+    <div class="product-info">
+        <div class="price-row">
+            <div class="price" id="book-price">Memuat...</div>
+            <div class="sold-count" id="book-sold">... Terjual</div>
+        </div>
+        <div class="title" id="book-title">Memuat...</div>
+        
+        <!-- TAGAR -->
+        <div class="tags-container" id="book-tags">
+            <!-- Tagar dimuat via JS -->
+        </div>
+    </div>
+
+    <!-- DESKRIPSI (DROPDOWN) -->
+    <details class="description-accordion">
+        <summary class="desc-summary">
+            Deskripsi Produk <i class="fa fa-chevron-down"></i>
+        </summary>
+        <div class="desc-content" id="book-desc">Memuat deskripsi...</div>
+    </details>
+
+    <!-- PENILAIAN -->
+    <div class="reviews-section">
+        <div class="review-header">
+            <div><strong>Penilaian Produk</strong></div>
+            <div class="stars" id="overall-rating">
+                <i class="fa fa-star"></i> 0
+            </div>
+        </div>
+        <div id="review-list">
+            <p style="font-size: 13px; color: #888;">Memuat penilaian...</p>
+        </div>
+    </div>
+
+    <!-- PRODUK MIRIP (BERDASARKAN TAGAR) -->
+    <div class="similar-section">
+        <div class="section-title">Mungkin Anda Suka (Berdasarkan Tagar)</div>
+        <div class="grid-container" id="similar-list">
+            <!-- Dimuat via JS -->
+        </div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+        <div class="btn-chat"><i class="fa fa-comments" style="font-size:18px; margin-bottom:3px;"></i> Chat</div>
+        <div class="btn-cart"><i class="fa fa-cart-plus" style="font-size:18px; margin-bottom:3px;"></i> Keranjang</div>
+        <a href="login.html" class="btn-buy">Beli Sekarang</a>
+    </div>
+
+    <!-- SCRIPT FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0",
+            authDomain: "mading-cf676.firebaseapp.com",
+            projectId: "mading-cf676",
+            storageBucket: "mading-cf676.firebasestorage.app",
+            messagingSenderId: "72175203671",
+            appId: "1:72175203671:web:7a0676a55beb64bc96ba12",
+            measurementId: "G-590P9LLK7J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Ambil ID dari URL (contoh: preview.html?id=123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+
+        const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        async function loadBookData() {
+            if (!bookId) {
+                document.getElementById('book-title').innerText = "Buku tidak ditemukan";
+                return;
+            }
+
+            try {
+                // 1. AMBIL DATA BUKU
+                const bookRef = doc(db, "books", bookId);
+                const bookSnap = await getDoc(bookRef);
+
+                if (bookSnap.exists()) {
+                    const data = bookSnap.data();
+                    
+                    // Render Teks
+                    document.getElementById('book-title').innerHTML = `<span class="badge-mall">Mall | ORI</span> ${data.title}`;
+                    document.getElementById('book-price').innerText = formatRupiah(data.price);
+                    document.getElementById('book-sold').innerText = `${data.sold_count >= 1000 ? (data.sold_count/1000).toFixed(1) + 'RB+' : data.sold_count} Terjual`;
+                    document.getElementById('book-desc').innerText = data.description || "Tidak ada deskripsi.";
+                    document.getElementById('overall-rating').innerHTML = `<i class="fa fa-star"></i> ${data.rating || 0}`;
+
+                    // Render Gambar & Thumbnail
+                    const mainImage = document.getElementById('main-image');
+                    const thumbList = document.getElementById('thumbnail-list');
+                    
+                    // Asumsi ada array images_base64 di DB, jika tidak fallback ke single image
+                    const images = data.images_base64 || [data.image_base64]; 
+                    mainImage.src = images[0];
+                    
+                    images.forEach((imgSrc, index) => {
+                        const imgEl = document.createElement('img');
+                        imgEl.src = imgSrc;
+                        imgEl.className = `thumbnail-img ${index === 0 ? 'active' : ''}`;
+                        imgEl.onclick = () => {
+                            mainImage.src = imgSrc;
+                            document.querySelectorAll('.thumbnail-img').forEach(el => el.classList.remove('active'));
+                            imgEl.classList.add('active');
+                        };
+                        thumbList.appendChild(imgEl);
+                    });
+
+                    // Render Tagar Aktif
+                    const tagsContainer = document.getElementById('book-tags');
+                    const tags = data.tags || [];
+                    if(tags.length > 0) {
+                        tags.forEach(tag => {
+                            // Link akan mengarah ke index pencarian (contoh)
+                            tagsContainer.innerHTML += `<a href="index.html?tag=${encodeURIComponent(tag)}" class="tag-item">#${tag}</a>`;
+                        });
+                        // 4. LOAD PRODUK MIRIP BERDASARKAN TAGAR
+                        loadSimilarProducts(tags);
+                    } else {
+                        document.querySelector('.similar-section').style.display = 'none';
+                    }
+
+                    // 3. LOAD PENILAIAN (Sub-collection)
+                    loadReviews();
+
+                }
+            } catch (error) {
+                console.error("Gagal memuat:", error);
+            }
+        }
+
+        async function loadReviews() {
+            const reviewList = document.getElementById('review-list');
+            try {
+                const q = collection(db, `books/${bookId}/reviews`);
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    reviewList.innerHTML = '<p style="font-size:13px; color:#555;">Belum ada penilaian untuk buku ini.</p>';
+                    return;
+                }
+
+                reviewList.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const rev = doc.data();
+                    let starsHtml = '';
+                    for(let i=0; i<5; i++) { starsHtml += i < rev.rating ? '<i class="fa fa-star stars"></i>' : '<i class="fa-regular fa-star stars"></i>'; }
+                    
+                    reviewList.innerHTML += `
+                        <div class="review-item">
+                            <div class="reviewer-name">${rev.username}</div>
+                            <div>${starsHtml}</div>
+                            <div class="review-text">${rev.text}</div>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                reviewList.innerHTML = '<p>Gagal memuat penilaian.</p>';
+            }
+        }
+
+        async function loadSimilarProducts(tagsArray) {
+            const similarList = document.getElementById('similar-list');
+            try {
+                // Cari buku yang punya tagar sama (menggunakan array-contains-any)
+                const q = query(collection(db, "books"), where("tags", "array-contains-any", tagsArray), limit(4));
+                const querySnapshot = await getDocs(q);
+                
+                similarList.innerHTML = '';
+                querySnapshot.forEach((docSnap) => {
+                    if (docSnap.id !== bookId) { // Jangan tampilkan buku yg sedang dibuka
+                        const data = docSnap.data();
+                        similarList.innerHTML += `
+                            <a href="preview.html?id=${docSnap.id}" class="product-card">
+                                <img src="${data.image_base64 || data.images_base64[0]}" alt="${data.title}">
+                                <div class="card-title">${data.title}</div>
+                                <div class="card-price">${formatRupiah(data.price)}</div>
+                            </a>
+                        `;
+                    }
+                });
+                if(similarList.innerHTML === '') similarList.innerHTML = '<p style="font-size:12px;">Tidak ada produk serupa.</p>';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Hitung Mundur Voucher Buatan
+        function startCountdown() {
+            let m = 59, s = 48;
+            setInterval(() => {
+                s--;
+                if(s < 0) { s = 59; m--; }
+                document.getElementById('m').innerText = m < 10 ? '0'+m : m;
+                document.getElementById('s').innerText = s < 10 ? '0'+s : s;
+            }, 1000);
+        }
+
+        window.onload = () => {
+            loadBookData();
+            startCountdown();
+        };
+    </script>
+</body>
+</html>
