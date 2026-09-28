@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>E-Receipt Pesanan</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Library Barcode -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- Library HTML to Image (Untuk Download) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px 15px; }
+
+        /* KARTU STRUK / E-RECEIPT */
+        .receipt-card {
+            background: #fff;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            border-top: 5px solid #ee4d2d;
+        }
+
+        /* EFEK GIGI GERGAJI DI BAWAH STRUK */
+        .receipt-card::after {
+            content: "";
+            position: absolute;
+            bottom: -10px; left: 0; width: 100%; height: 20px;
+            background: radial-gradient(circle, transparent, transparent 50%, #fff 50%, #fff 100%);
+            background-size: 20px 20px;
+        }
+
+        .text-center { text-align: center; }
+        .logo-img { width: 60px; margin-bottom: 10px; }
+        .store-name { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .receipt-title { font-size: 12px; color: #888; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .barcode-container { text-align: center; margin-bottom: 20px; }
+        .barcode-container svg { width: 100%; max-width: 250px; height: auto; }
+        
+        .dashed-line { border-top: 1px dashed #ccc; margin: 15px 0; }
+
+        .info-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: #555; }
+        .info-row.bold { font-weight: bold; color: #333; font-size: 14px; }
+        
+        .item-list { margin-bottom: 15px; }
+        .item-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+        .item-name { width: 60%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .address-box { background: #f9f9f9; padding: 10px; border-radius: 4px; font-size: 11px; color: #555; line-height: 1.5; margin-top: 15px; }
+
+        /* TOMBOL AKSI */
+        .action-container { width: 100%; max-width: 400px; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-download { background-color: #ee4d2d; color: white; }
+        .btn-wa { background-color: #25D366; color: white; }
+
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; justify-content: center; align-items: center; flex-direction: column; font-weight: bold; color: #ee4d2d; }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loading-overlay">Memproses...</div>
+
+    <!-- AREA STRUK YANG AKAN DI-SCREENSHOT OTOMATIS -->
+    <div class="receipt-card" id="receipt-capture">
+        <div class="text-center">
+            <img src="https://imgur.com/1xvp0t2" alt="Logo" class="logo-img">
+            <div class="store-name">Toko Buku Resmi</div>
+            <div class="receipt-title">E-Receipt Pesanan</div>
+        </div>
+
+        <div class="barcode-container">
+            <!-- Tempat Barcode Digenerate -->
+            <svg id="barcode"></svg>
+        </div>
+
+        <div class="info-row">
+            <span>No. Pesanan:</span>
+            <span id="order-id" style="font-weight:bold;">Memuat...</span>
+        </div>
+        <div class="info-row">
+            <span>Tanggal:</span>
+            <span id="order-date">-</span>
+        </div>
+
+        <div class="dashed-line"></div>
+
+        <div class="item-list" id="item-container">
+            <span style="font-size: 12px; color: #888;">Memuat produk...</span>
+            <!-- Item dirender di sini -->
+        </div>
+
+        <div class="dashed-line"></div>
+
+        <div class="info-row">
+            <span>Subtotal Produk</span>
+            <span id="subtotal">Rp0</span>
+        </div>
+        <div class="info-row">
+            <span>Biaya Layanan</span>
+            <span>Rp1.000</span>
+        </div>
+        <div class="info-row bold">
+            <span>Total Bayar</span>
+            <span id="total-bayar">Rp0</span>
+        </div>
+
+        <div class="address-box" id="address-box">
+            Memuat alamat pengiriman...
+        </div>
+    </div>
+
+    <!-- TOMBOL AKSI -->
+    <div class="action-container">
+        <button class="btn btn-download" onclick="unduhDanKirimEmail()"><i class="fa fa-download"></i> Unduh & Kirim ke Email</button>
+        <button class="btn btn-wa" onclick="lanjutKeWhatsApp()"><i class="fa fa-whatsapp"></i> Konfirmasi ke WhatsApp Admin</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpUWUIzPXIZN6rrNtsIqcL6VfOE2RLVl0",
+            authDomain: "mading-cf676.firebaseapp.com",
+            projectId: "mading-cf676",
+            storageBucket: "mading-cf676.firebasestorage.app",
+            messagingSenderId: "72175203671",
+            appId: "1:72175203671:web:7a0676a55beb64bc96ba12",
+            measurementId: "G-590P9LLK7J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        // Ambil ID dari URL (Misal: e_receipt.html?id=ORD-12345)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentOrderId = urlParams.get('id');
+
+        let orderData = null;
+        let userEmail = "";
+
+        // 1. CEK AUTH & LOAD DATA PESANAN
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userEmail = user.email; // Simpan email untuk dikirimi struk
+                if(currentOrderId) {
+                    await loadReceipt(currentOrderId);
+                } else {
+                    alert("Pesanan tidak ditemukan.");
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        async function loadReceipt(orderId) {
+            try {
+                const docRef = doc(db, "orders", orderId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    orderData = docSnap.data();
+                    
+                    // Generate Barcode
+                    JsBarcode("#barcode", orderData.order_id, {
+                        format: "CODE128",
+                        lineColor: "#333",
+                        width: 2,
+                        height: 50,
+                        displayValue: true
+                    });
+
+                    // Render Teks
+                    document.getElementById('order-id').innerText = orderData.order_id;
+                    
+                    // Format Tanggal
+                    const date = orderData.timestamp ? orderData.timestamp.toDate() : new Date();
+                    document.getElementById('order-date').innerText = date.toLocaleString('id-ID');
+
+                    // Render Items
+                    const itemContainer = document.getElementById('item-container');
+                    itemContainer.innerHTML = '';
+                    orderData.items.forEach(item => {
+                        itemContainer.innerHTML += `
+                            <div class="item-row">
+                                <div class="item-name">${item.title} (x${item.quantity})</div>
+                                <div>${formatRupiah(item.price * item.quantity)}</div>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('subtotal').innerText = formatRupiah(orderData.total_bayar - 1000);
+                    document.getElementById('total-bayar').innerText = formatRupiah(orderData.total_bayar);
+
+                    // Render Alamat
+                    document.getElementById('address-box').innerHTML = `
+                        <strong>Penerima: ${orderData.address.nama_penerima}</strong><br>
+                        ${orderData.address.jalan}, ${orderData.address.detail || ''}<br>
+                        Telp: ${orderData.address.telepon}
+                    `;
+                }
+            } catch (error) {
+                console.error("Gagal memuat e-receipt:", error);
+            }
+        }
+
+        // 2. FUNGSI UNDUH GAMBAR & KIRIM EMAIL (TERHUBUNG KE FIREBASE TRIGGER EMAIL)
+        window.unduhDanKirimEmail = async () => {
+            if(!orderData) return;
+            const overlay = document.getElementById('loading-overlay');
+            overlay.style.display = 'flex';
+            overlay.innerText = 'Mengunduh & Mengirim Email...';
+
+            try {
+                // A. UNDUH STRUK SEBAGAI GAMBAR
+                const receiptElement = document.getElementById('receipt-capture');
+                const canvas = await html2canvas(receiptElement, { scale: 2 });
+                const imgData = canvas.toDataURL("image/jpeg", 1.0);
+                
+                // Buat link download palsu dan klik
+                const link = document.createElement('a');
+                link.download = `Struk_${orderData.order_id}.jpg`;
+                link.href = imgData;
+                link.click();
+
+                // B. KIRIM EMAIL MELALUI FIREBASE COLLECTION 'mail'
+                // Ini membutuhkan ekstensi "Trigger Email" di Firebase Console Anda terpasang.
+                await addDoc(collection(db, 'mail'), {
+                    to: userEmail,
+                    message: {
+                        subject: `E-Receipt Pesanan Anda - ${orderData.order_id}`,
+                        text: `Halo, pesanan Anda dengan ID ${orderData.order_id} sebesar ${formatRupiah(orderData.total_bayar)} telah kami terima.`,
+                        html: `
+                            <h3>Terima kasih telah memesan di Toko Buku Kami!</h3>
+                            <p>Pesanan Anda sedang menunggu pembayaran/konfirmasi.</p>
+                            <p><b>ID Pesanan:</b> ${orderData.order_id}</p>
+                            <p><b>Total:</b> ${formatRupiah(orderData.total_bayar)}</p>
+                            <br>
+                            <p>Harap tunjukkan Barcode pesanan ini atau teruskan pesan WhatsApp ke Admin kami.</p>
+                        `
+                    }
+                });
+
+                alert("Berhasil diunduh! Salinan struk sedang dikirim ke email Anda (" + userEmail + ").");
+                overlay.style.display = 'none';
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Terjadi kesalahan.");
+                overlay.style.display = 'none';
+            }
+        }
+
+        // 3. FUNGSI LANJUT KE WHATSAPP (Setelah selesai unduh)
+        window.lanjutKeWhatsApp = () => {
+            if(!orderData) return;
+            
+            let waText = `*KONFIRMASI PEMBAYARAN - TOKO BUKU*\n\n`;
+            waText += `*ID Pesanan:* ${orderData.order_id}\n`;
+            waText += `*Nama:* ${orderData.address.nama_penerima}\n`;
+            waText += `*Total Pembayaran: ${formatRupiah(orderData.total_bayar)}*\n\n`;
+            waText += `Saya sudah mengunduh e-receipt dan ingin melakukan pembayaran. Berikut e-receipt saya (akan saya kirimkan gambarnya).`;
+
+            const encodedText = encodeURIComponent(waText);
+            const waNumber = "628895615630"; 
+            window.location.href = `https://wa.me/${waNumber}?text=${encodedText}`;
+        }
+    </script>
+</body>
+</html>
